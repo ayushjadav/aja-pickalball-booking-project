@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="paddleApp">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>City Paddle Court – Rajkot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<style>
+:root{
+  --ink:#0d1f0f; --forest:#1a3d20; --green:#2e6b3e; --lime:#5cb85c;
+  --sand:#f5f0e8; --cream:#fdfaf4; --amber:#e8a020; --amber-lt:#ffc84a;
+  --white:#ffffff; --muted:#6b7a6d; --border:#d6dfd7; --red:#d63031;
+  --booked-bg:#fff0f0; --booked-border:#f5c6c5; --booked-text:#b71c1c;
+  --r:14px; --sh:0 8px 32px rgba(13,31,15,0.12);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--ink);line-height:1.65;overflow-x:hidden;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:999;background:var(--forest);
+  display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:62px;
+  box-shadow:0 2px 24px rgba(0,0,0,.25);}
+.nav-brand{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;color:var(--amber-lt);letter-spacing:1px;}
+.nav-brand em{color:rgba(255,255,255,.85);font-style:normal;}
+.nav-links{display:flex;gap:4px;}
+.nav-links a{color:rgba(255,255,255,.72);padding:6px 14px;border-radius:8px;font-size:.88rem;
+  font-weight:500;cursor:pointer;transition:all .18s;text-decoration:none;}
+.nav-links a:hover{color:#fff;background:rgba(255,255,255,.1);}
+
+/* ── HERO ── */
+#hero{min-height:100vh;background:linear-gradient(155deg,var(--forest) 0%,#0d2b14 55%,#1e4d28 100%);
+  display:flex;align-items:center;padding:100px 2.5rem 60px;position:relative;overflow:hidden;}
+#hero::before{content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,255,255,.03) 60px,rgba(255,255,255,.03) 61px),
+  repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,255,255,.03) 60px,rgba(255,255,255,.03) 61px);}
+#hero::after{content:'';position:absolute;right:-120px;top:-120px;width:560px;height:560px;
+  background:radial-gradient(circle,rgba(92,184,92,.14) 0%,transparent 70%);border-radius:50%;}
+.hero-inner{position:relative;z-index:1;max-width:1100px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;width:100%;}
+.hero-text{color:var(--white);}
+.hero-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(232,160,32,.2);
+  border:1px solid rgba(232,160,32,.4);color:var(--amber-lt);font-size:.78rem;font-weight:600;
+  letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:1.4rem;}
+.hero-title{font-family:'Syne',sans-serif;font-size:clamp(2.6rem,5vw,4rem);font-weight:800;
+  line-height:1.08;margin-bottom:1.2rem;letter-spacing:-.5px;}
+.hero-title .hl{color:var(--amber-lt);}
+.hero-desc{font-size:1.05rem;color:rgba(255,255,255,.72);margin-bottom:2rem;max-width:420px;}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem;}
+.h-stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:10px;
+  padding:.9rem .6rem;text-align:center;}
+.h-stat .sv{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--amber-lt);}
+.h-stat .sl{font-size:.72rem;color:rgba(255,255,255,.55);margin-top:2px;}
+.court-svg-wrap{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);
+  border-radius:18px;padding:2rem;backdrop-filter:blur(6px);}
+.court-svg-wrap svg{display:block;width:100%;}
+
+/* ── SECTIONS ── */
+section{padding:80px 2.5rem;}
+.sec-in{max-width:1100px;margin:0 auto;}
+.sec-lbl{font-size:.72rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--green);margin-bottom:.5rem;}
+.sec-title{font-family:'Syne',sans-serif;font-size:clamp(1.9rem,3.5vw,2.6rem);font-weight:800;
+  color:var(--ink);line-height:1.15;margin-bottom:.6rem;}
+.sec-sub{color:var(--muted);font-size:1rem;margin-bottom:2.5rem;max-width:600px;}
+.acc-bar{width:44px;height:4px;background:var(--amber);border-radius:2px;margin-bottom:2rem;}
+
+/* ── COURT SECTION ── */
+#court{background:var(--sand);}
+.court-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:start;}
+.court-info-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);overflow:hidden;}
+.card-top{background:linear-gradient(135deg,var(--forest),var(--green));padding:2.5rem;
+  display:flex;align-items:center;justify-content:center;min-height:200px;position:relative;overflow:hidden;}
+.card-top::before{content:'';position:absolute;inset:12px;border:2px solid rgba(255,255,255,.18);border-radius:8px;}
+.card-top::after{content:'';position:absolute;top:50%;left:0;right:0;height:2px;background:rgba(255,255,255,.18);}
+.net-v{position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(255,255,255,.18);}
+.big-icon{font-size:4rem;position:relative;z-index:1;}
+.card-body{padding:1.8rem;}
+.det-row{display:flex;align-items:flex-start;gap:.9rem;padding:.85rem 0;border-bottom:1px solid var(--border);}
+.det-row:last-child{border-bottom:none;}
+.d-ic{font-size:1.2rem;flex-shrink:0;margin-top:1px;}
+.d-k{font-size:.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.d-v{font-weight:600;color:var(--ink);font-size:.97rem;margin-top:2px;}
+.badge-price{display:inline-block;background:var(--amber);color:var(--ink);font-weight:700;font-size:1rem;padding:3px 12px;border-radius:6px;margin-top:2px;}
+.badge-avail{display:inline-block;background:#e6f7ea;color:#1e6b2e;font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.8px;margin-top:2px;}
+.amenity-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:1rem;}
+.a-tag{display:flex;align-items:center;gap:8px;background:var(--sand);border:1px solid var(--border);
+  border-radius:8px;padding:.55rem .9rem;font-size:.88rem;font-weight:500;color:var(--forest);}
+
+/* ── SLOT AVAILABILITY PANEL ── */
+.slots-col{display:flex;flex-direction:column;gap:1rem;}
+.avail-date-picker{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:1.4rem 1.6rem;}
+.avail-date-picker label{display:block;font-size:.77rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:.5rem;}
+.avail-date-picker input{width:100%;padding:.65rem 1rem;border:1.5px solid var(--border);border-radius:9px;
+  font-family:'Outfit',sans-serif;font-size:.97rem;color:var(--ink);background:var(--cream);outline:none;transition:border-color .18s;}
+.avail-date-picker input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(46,107,62,.1);}
+
+.slot-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);
+  padding:1.2rem 1.4rem;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 10px rgba(0,0,0,.06);transition:all .2s;}
+.slot-card.available{cursor:pointer;}
+.slot-card.available:hover{border-color:var(--lime);transform:translateY(-2px);box-shadow:0 6px 20px rgba(46,107,62,.15);}
+.slot-card.booked{background:var(--booked-bg);border-color:var(--booked-border);opacity:.85;cursor:not-allowed;}
+.slot-time{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--ink);}
+.slot-dur{font-size:.78rem;color:var(--muted);margin-top:2px;}
+.slot-card.booked .slot-time{color:var(--booked-text);}
+.slot-badge{font-size:.73rem;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap;}
+.slot-badge.open{background:#e6f7ea;color:#1e6b2e;}
+.slot-badge.taken{background:var(--booked-bg);color:var(--booked-text);border:1px solid var(--booked-border);}
+.booked-by{font-size:.72rem;color:var(--booked-text);margin-top:3px;font-style:italic;}
+.quick-book-btn{background:var(--green);color:#fff;border:none;border-radius:8px;padding:5px 14px;
+  font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .18s;}
+.quick-book-btn:hover{background:#245530;}
+.slots-note{background:linear-gradient(135deg,var(--forest),var(--green));color:rgba(255,255,255,.85);
+  border-radius:var(--r);padding:1.3rem 1.6rem;font-size:.9rem;line-height:1.6;}
+.slots-note strong{color:var(--amber-lt);}
+.avail-hint{font-size:.82rem;color:var(--muted);margin-top:.5rem;display:flex;align-items:center;gap:6px;}
+
+/* ── BOOKING FORM ── */
+#booking{background:var(--cream);}
+.bk-layout{display:grid;grid-template-columns:1fr 360px;gap:2.5rem;align-items:start;}
+.form-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:2.2rem;}
+.form-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--ink);margin-bottom:.3rem;}
+.form-sub{color:var(--muted);font-size:.9rem;margin-bottom:1.8rem;}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;}
+.f-grp{margin-bottom:1.2rem;}
+.f-grp label{display:block;font-size:.77rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:.45rem;}
+.f-grp input,.f-grp select{width:100%;padding:.72rem 1rem;border:1.5px solid var(--border);border-radius:9px;
+  font-family:'Outfit',sans-serif;font-size:.97rem;color:var(--ink);background:var(--cream);
+  outline:none;transition:border-color .18s,box-shadow .18s;}
+.f-grp input:focus,.f-grp select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(46,107,62,.1);background:var(--white);}
+.f-grp select option:disabled{color:#aaa;background:#fafafa;}
+.f-err{font-size:.8rem;color:var(--red);margin-top:.35rem;}
+.alert{border-radius:9px;padding:.9rem 1.1rem;font-size:.92rem;font-weight:500;margin-top:1rem;}
+.a-ok{background:#e8f7ec;color:#1a5c2a;border:1.5px solid #a8ddb5;}
+.a-err{background:#fdecea;color:#b71c1c;border:1.5px solid #f5c6c5;}
+.btn-row{display:flex;gap:10px;margin-top:1.5rem;flex-wrap:wrap;}
+
+/* ── SIDEBAR ── */
+.sum-panel{display:flex;flex-direction:column;gap:1rem;position:sticky;top:78px;}
+.sum-box{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;}
+.sum-head{background:linear-gradient(135deg,var(--forest),var(--green));padding:1.1rem 1.3rem;
+  color:var(--white);font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.5px;}
+.sum-body{padding:1.1rem 1.3rem;}
+.s-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.9rem;}
+.s-row:last-child{border-bottom:none;}
+.s-k{color:var(--muted);}
+.s-v{font-weight:600;color:var(--ink);}
+.s-price{color:var(--amber);font-weight:800;font-size:1.05rem;}
+
+/* availability mini grid in sidebar */
+.avail-mini{display:flex;flex-direction:column;gap:6px;margin-top:.5rem;}
+.avail-mini-row{display:flex;align-items:center;justify-content:space-between;font-size:.83rem;padding:6px 10px;border-radius:8px;}
+.avail-mini-row.free{background:#e6f7ea;color:#1a5c2a;}
+.avail-mini-row.busy{background:var(--booked-bg);color:var(--booked-text);}
+.avail-mini-slot{font-weight:600;}
+.avail-mini-tag{font-size:.7rem;font-weight:700;letter-spacing:.5px;}
+
+/* ── BOOKINGS TABLE ── */
+#bookings{background:var(--sand);}
+.tbl-controls{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;}
+.tbl-filters{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;}
+.srch-wrap{position:relative;}
+.srch-wrap input{padding:.6rem 1rem .6rem 2.4rem;border:1.5px solid var(--border);border-radius:9px;
+  font-family:'Outfit',sans-serif;font-size:.9rem;color:var(--ink);background:var(--white);
+  outline:none;width:220px;transition:border-color .18s;}
+.srch-wrap input:focus{border-color:var(--green);}
+.srch-ic{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none;}
+.filter-select{padding:.55rem .9rem;border:1.5px solid var(--border);border-radius:9px;
+  font-family:'Outfit',sans-serif;font-size:.85rem;color:var(--ink);background:var(--white);outline:none;}
+.cnt-badge{background:var(--forest);color:var(--white);font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.8px;white-space:nowrap;}
+.tbl-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--sand);border-bottom:1.5px solid var(--border);}
+thead th{text-align:left;padding:.85rem 1.1rem;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#f7fbf7;}
+tbody td{padding:.9rem 1.1rem;font-size:.93rem;vertical-align:middle;}
+.td-nm{font-weight:700;color:var(--ink);}
+.td-ph{color:var(--muted);font-size:.85rem;}
+.td-sl{display:inline-block;background:#e6f7ea;color:#1a5c2a;font-size:.78rem;font-weight:700;padding:3px 9px;border-radius:6px;}
+.td-date{font-weight:500;}
+.td-ix{width:26px;height:26px;border-radius:50%;background:var(--sand);border:1.5px solid var(--border);
+  display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--muted);}
+.past-row{opacity:.6;}
+.past-label{display:inline-block;background:#f0f0f0;color:#888;font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:5px;}
+.upcoming-label{display:inline-block;background:#e8f7ec;color:#1a5c2a;font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:5px;}
+.empty-box{text-align:center;padding:4rem 2rem;color:var(--muted);}
+.empty-box .ei{font-size:3rem;margin-bottom:.75rem;}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:.7rem 1.8rem;border-radius:9px;
+  font-family:'Outfit',sans-serif;font-size:.97rem;font-weight:600;cursor:pointer;border:none;
+  transition:all .18s;letter-spacing:.2px;text-decoration:none;}
+.btn-am{background:var(--amber);color:var(--ink);}
+.btn-am:hover{background:#d4900e;transform:translateY(-2px);box-shadow:0 6px 18px rgba(232,160,32,.38);}
+.btn-gn{background:var(--green);color:var(--white);}
+.btn-gn:hover{background:#245530;transform:translateY(-2px);}
+.btn-gh{background:transparent;color:var(--green);border:1.5px solid var(--green);}
+.btn-gh:hover{background:var(--green);color:var(--white);}
+.btn-rd{background:var(--red);color:var(--white);padding:.38rem .9rem;font-size:.82rem;border-radius:7px;}
+.btn-rd:hover{background:#b71c1c;}
+.btn-sm{padding:.45rem 1.1rem;font-size:.85rem;}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);color:rgba(255,255,255,.55);text-align:center;padding:1.8rem 2rem;font-size:.85rem;}
+footer strong{color:var(--amber-lt);}
+
+/* ── FADE-UP ── */
+.fade-up{opacity:0;transform:translateY(28px);transition:opacity .6s ease,transform .6s ease;}
+.fade-up.visible{opacity:1;transform:none;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .hero-inner,.court-grid,.bk-layout{grid-template-columns:1fr;}
+  .court-visual-wrap{display:none;}
+  .f-row{grid-template-columns:1fr;}
+  .sum-panel{position:static;}
+  nav{padding:0 1.2rem;}
+  .nav-links a{font-size:.8rem;padding:5px 9px;}
+  section{padding:60px 1.4rem;}
+}
+</style>
+</head>
+<body ng-controller="AppCtrl">
+
+<!-- ═══ NAVBAR ═══ -->
+<nav>
+  <div class="nav-brand">City<em>Paddle</em></div>
+  <div class="nav-links">
+    <a href="#hero">🏠 Home</a>
+    <a href="#court">🏓 Court</a>
+    <a href="#booking">📅 Book Slot</a>
+    <a href="#bookings">📋 My Bookings</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-pill">🏓 jamnagar's Premier Paddle Court</div>
+      <h1 class="hero-title">Play Paddle.<br><span class="hl">Book Your</span><br>Court Today.</h1>
+      <p class="hero-desc">{{ court.description }}</p>
+      <div class="hero-cta">
+        <a href="#booking" class="btn btn-am">Book a Slot →</a>
+        <a href="#court" class="btn btn-gh" style="color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.3);">Check Availability</a>
+      </div>
+      <div class="hero-stats">
+        <div class="h-stat"><div class="sv">1</div><div class="sl">Court</div></div>
+        <div class="h-stat"><div class="sv">3</div><div class="sl">Eve. Slots</div></div>
+        <div class="h-stat"><div class="sv">{{ court.price }}</div><div class="sl">Per Hour</div></div>
+      </div>
+    </div>
+    <div class="court-visual-wrap">
+      <div class="court-svg-wrap">
+        <svg viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" width="340" height="200" rx="8" fill="#1e4d28"/>
+          <rect x="20" y="20" width="320" height="180" rx="4" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2.5"/>
+          <line x1="180" y1="20" x2="180" y2="200" stroke="rgba(255,255,255,.5)" stroke-width="2"/>
+          <line x1="20" y1="110" x2="340" y2="110" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
+          <line x1="180" y1="55" x2="180" y2="165" stroke="rgba(255,255,255,.9)" stroke-width="4" stroke-linecap="round"/>
+          <line x1="172" y1="50" x2="188" y2="50" stroke="rgba(255,255,255,.9)" stroke-width="3"/>
+          <line x1="172" y1="170" x2="188" y2="170" stroke="rgba(255,255,255,.9)" stroke-width="3"/>
+          <line x1="80" y1="20" x2="80" y2="200" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
+          <line x1="280" y1="20" x2="280" y2="200" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
+          <circle cx="120" cy="85" r="8" fill="#ffc84a"/>
+          <circle cx="120" cy="85" r="4" fill="rgba(255,255,255,.3)"/>
+          <ellipse cx="60" cy="130" rx="16" ry="20" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="3"/>
+          <line x1="60" y1="150" x2="60" y2="170" stroke="rgba(255,255,255,.7)" stroke-width="3" stroke-linecap="round"/>
+          <line x1="52" y1="130" x2="68" y2="130" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+          <line x1="50" y1="120" x2="70" y2="120" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+          <line x1="50" y1="140" x2="70" y2="140" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+          <ellipse cx="300" cy="90" rx="16" ry="20" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="3"/>
+          <line x1="300" y1="110" x2="300" y2="130" stroke="rgba(255,255,255,.7)" stroke-width="3" stroke-linecap="round"/>
+          <line x1="292" y1="90" x2="308" y2="90" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+          <line x1="290" y1="80" x2="310" y2="80" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+          <line x1="290" y1="100" x2="310" y2="100" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+          <text x="180" y="215" text-anchor="middle" fill="rgba(255,255,255,.4)" font-size="10" font-family="sans-serif" letter-spacing="3">CITY PADDLE COURT</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ COURT + AVAILABILITY ═══ -->
+<section id="court">
+  <div class="sec-in">
+    <div class="sec-lbl">The Court</div>
+    <h2 class="sec-title">{{ court.name }}</h2>
+    <div class="acc-bar"></div>
+    <p class="sec-sub">Check real-time slot availability for any date. Green = open, red = booked.</p>
+
+    <div class="court-grid">
+
+      <!-- Court info card -->
+      <div class="court-info-card fade-up">
+        <div class="card-top">
+          <div class="net-v"></div>
+          <div class="big-icon">🏓</div>
+        </div>
+        <div class="card-body">
+          <div class="det-row">
+            <span class="d-ic">🏟️</span>
+            <div><div class="d-k">Court Name</div><div class="d-v">{{ court.name }}</div></div>
+          </div>
+          <div class="det-row">
+            <span class="d-ic">📍</span>
+            <div><div class="d-k">Location</div><div class="d-v">{{ court.location }}</div></div>
+          </div>
+          <div class="det-row">
+            <span class="d-ic">💰</span>
+            <div><div class="d-k">Price</div><div class="badge-price">{{ court.price }}</div></div>
+          </div>
+          <div class="det-row">
+            <span class="d-ic">🟢</span>
+            <div>
+              <div class="d-k">Availability Today</div>
+              <div class="badge-avail">{{ getAvailableCountForDate(todayStr) }} / {{ court.timeSlots.length }} Slots Open</div>
+            </div>
+          </div>
+          <div style="margin-top:1rem;">
+            <div class="d-k" style="margin-bottom:.6rem;">Amenities</div>
+            <div class="amenity-grid">
+              <div class="a-tag" ng-repeat="a in court.amenities">✅ {{ a }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slot availability checker -->
+      <div class="slots-col fade-up">
+        <div class="avail-date-picker">
+          <label>📆 Check availability for date</label>
+          <input type="date" ng-model="checkDate" min="{{ todayStr }}" ng-change="onCheckDateChange()"/>
+          <div class="avail-hint" ng-show="checkDate">
+            <span style="background:#e6f7ea;color:#1e6b2e;padding:2px 8px;border-radius:6px;font-size:.75rem;font-weight:700;">
+              {{ getAvailableCountForDate(checkDate) }} open
+            </span>
+            <span style="background:var(--booked-bg);color:var(--booked-text);padding:2px 8px;border-radius:6px;font-size:.75rem;font-weight:700;">
+              {{ court.timeSlots.length - getAvailableCountForDate(checkDate) }} booked
+            </span>
+            <span style="font-size:.8rem;">on {{ checkDate | prettyDate }}</span>
+          </div>
+        </div>
+
+        <!-- Live slot cards — status changes based on selected date -->
+        <div class="slot-card" ng-repeat="s in court.timeSlots"
+             ng-class="isSlotTaken(checkDate, s) ? 'booked' : 'available'">
+          <div>
+            <div class="slot-time">🕐 {{ s }}</div>
+            <div class="slot-dur">1 hour · {{ court.price }}</div>
+            <div class="booked-by" ng-show="isSlotTaken(checkDate, s)">
+              Booked by {{ getBookedByName(checkDate, s) }}
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+            <span class="slot-badge" ng-class="isSlotTaken(checkDate, s) ? 'taken' : 'open'">
+              {{ isSlotTaken(checkDate, s) ? '🔴 Booked' : '🟢 Open' }}
+            </span>
+            <button class="quick-book-btn"
+                    ng-show="!isSlotTaken(checkDate, s) && checkDate"
+                    ng-click="quickBook(checkDate, s)">
+              Book →
+            </button>
+          </div>
+        </div>
+
+        <div class="slots-note">
+          <strong>💡 Court Rules</strong><br/>
+          Arrive 5 mins early · Bring your own racket · Court shoes required · Max 4 players per slot · No cancellation within 2 hrs
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BOOKING FORM ═══ -->
+<section id="booking">
+  <div class="sec-in">
+    <div class="sec-lbl">Reservations</div>
+    <h2 class="sec-title">Book a Slot</h2>
+    <div class="acc-bar"></div>
+    <p class="sec-sub">Select a date to see which slots are available. Booked slots are automatically disabled.</p>
+
+    <div class="bk-layout">
+
+      <!-- FORM -->
+      <div class="form-card fade-up">
+        <div class="form-title">Booking Form</div>
+        <div class="form-sub">All fields required · Slots update live as you pick a date</div>
+
+        <div class="f-grp">
+          <label>👤 Full Name</label>
+          <input type="text" ng-model="form.name" placeholder="e.g. Aayush Jadav" maxlength="50"/>
+          <div class="f-err" ng-show="submitted && !form.name">⚠ Name is required.</div>
+        </div>
+
+        <div class="f-grp">
+          <label>📱 Phone Number</label>
+          <input type="tel" ng-model="form.phone" placeholder="10-digit mobile number" maxlength="10"/>
+          <div class="f-err" ng-show="submitted && !form.phone">⚠ Phone number is required.</div>
+          <div class="f-err" ng-show="submitted && form.phone && !isValidPhone(form.phone)">⚠ Enter a valid 10-digit number.</div>
+        </div>
+
+        <div class="f-row">
+          <div class="f-grp">
+            <label>📆 Date</label>
+            <input type="date" ng-model="form.date" min="{{ todayStr }}" ng-change="onFormDateChange()"/>
+            <div class="f-err" ng-show="submitted && !form.date">⚠ Please pick a date.</div>
+          </div>
+          <div class="f-grp">
+            <label>⏰ Time Slot
+              <span ng-show="form.date" style="color:var(--green);font-size:.72rem;font-weight:600;margin-left:4px;">
+                ({{ getAvailableCountForDate(form.date) }} available)
+              </span>
+            </label>
+            <select ng-model="form.slot">
+              <option value="">{{ form.date ? '-- Choose Slot --' : '-- Pick date first --' }}</option>
+              <!-- ng-repeat: each slot shown with availability status -->
+              <option ng-repeat="s in court.timeSlots"
+                      value="{{ s }}"
+                      ng-disabled="isSlotTaken(form.date, s)"
+                      ng-class="isSlotTaken(form.date, s) ? 'taken-opt' : ''">
+                {{ s }}{{ isSlotTaken(form.date, s) ? '  ✗ Booked' : '  ✓ Available' }}
+              </option>
+            </select>
+            <div class="f-err" ng-show="submitted && !form.slot">⚠ Please select a slot.</div>
+            <div class="f-err" ng-show="form.date && getAvailableCountForDate(form.date) === 0">
+              ⚠ All slots are booked for this date. Please pick another date.
+            </div>
+          </div>
+        </div>
+
+        <!-- Player count -->
+        <div class="f-grp">
+          <label>👥 Number of Players</label>
+          <select ng-model="form.players">
+            <option value="">-- Select --</option>
+            <option value="1">1 Player</option>
+            <option value="2">2 Players</option>
+            <option value="3">3 Players</option>
+            <option value="4">4 Players (Max)</option>
+          </select>
+        </div>
+
+        <div class="alert a-err" ng-show="bookErr">⛔ {{ bookErr }}</div>
+        <div class="alert a-ok" ng-show="bookOk">
+          🎉 {{ bookOk }}<br/>
+          <a href="#bookings" style="color:inherit;text-decoration:underline;font-size:.88rem;margin-top:4px;display:inline-block;">
+            View in My Bookings ↓
+          </a>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-gn" ng-click="confirmBooking()">✅ Confirm Booking</button>
+          <button class="btn btn-gh btn-sm" ng-click="clearForm()">✕ Clear</button>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="sum-panel fade-up">
+
+        <!-- Live booking preview -->
+        <div class="sum-box">
+          <div class="sum-head">📋 Your Selection Preview</div>
+          <div class="sum-body">
+            <div class="s-row"><span class="s-k">Name</span><span class="s-v">{{ form.name || '—' }}</span></div>
+            <div class="s-row"><span class="s-k">Date</span><span class="s-v">{{ form.date ? (form.date | prettyDate) : '—' }}</span></div>
+            <div class="s-row"><span class="s-k">Slot</span><span class="s-v">{{ form.slot || '—' }}</span></div>
+            <div class="s-row"><span class="s-k">Players</span><span class="s-v">{{ form.players || '—' }}</span></div>
+            <div class="s-row"><span class="s-k">Amount</span><span class="s-v s-price">{{ form.slot ? court.price : '—' }}</span></div>
+          </div>
+        </div>
+
+        <!-- Slot availability for form date -->
+        <div class="sum-box" ng-show="form.date">
+          <div class="sum-head">🗓 Slots on {{ form.date | prettyDate }}</div>
+          <div class="sum-body">
+            <div class="avail-mini">
+              <div class="avail-mini-row" ng-repeat="s in court.timeSlots"
+                   ng-class="isSlotTaken(form.date, s) ? 'busy' : 'free'">
+                <span class="avail-mini-slot">{{ s }}</span>
+                <span class="avail-mini-tag">{{ isSlotTaken(form.date, s) ? '🔴 Booked' : '🟢 Open' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Court summary -->
+        <div class="sum-box">
+          <div class="sum-head">🏓 Court Info</div>
+          <div class="sum-body">
+            <div class="s-row"><span class="s-k">Court</span><span class="s-v">{{ court.name }}</span></div>
+            <div class="s-row"><span class="s-k">Location</span><span class="s-v">Rajkot, GJ</span></div>
+            <div class="s-row"><span class="s-k">Price/hr</span><span class="s-v s-price">{{ court.price }}</span></div>
+            <div class="s-row"><span class="s-k">Total Bookings</span><span class="s-v">{{ bookings.length }}</span></div>
+          </div>
+        </div>
+
+        <div style="background:var(--sand);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.2rem;font-size:.85rem;color:var(--muted);line-height:1.7;">
+          🔒 Confirmed instantly. You can book <strong>multiple slots</strong> across different dates or times. Cancel anytime from <strong>My Bookings</strong>.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BOOKINGS TABLE ═══ -->
+<section id="bookings">
+  <div class="sec-in">
+    <div class="sec-lbl">My Bookings</div>
+    <h2 class="sec-title">Booking History</h2>
+    <div class="acc-bar"></div>
+
+    <div class="tbl-controls">
+      <div class="tbl-filters">
+        <div class="srch-wrap">
+          <span class="srch-ic">🔍</span>
+          <input type="text" ng-model="search" placeholder="Search by name…"/>
+        </div>
+        <select class="filter-select" ng-model="filterDate">
+          <option value="">All Dates</option>
+          <option ng-repeat="d in getUniqueDates()" value="{{ d }}">{{ d | prettyDate }}</option>
+        </select>
+        <select class="filter-select" ng-model="filterSlot">
+          <option value="">All Slots</option>
+          <option ng-repeat="s in court.timeSlots" value="{{ s }}">{{ s }}</option>
+        </select>
+      </div>
+      <span class="cnt-badge">{{ (bookings | filterBookings:search:filterDate:filterSlot).length }} Result(s)</span>
+    </div>
+
+    <div class="alert" ng-show="cancelMsg" style="margin-bottom:1rem;background:#fff8e1;color:#7c4a00;border:1.5px solid #f4c25a;">
+      🗑️ {{ cancelMsg }}
+    </div>
+
+    <div class="tbl-card fade-up">
+      <table ng-show="bookings.length > 0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Players</th>
+            <th>Date</th>
+            <th>Time Slot</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="b in bookings | filterBookings:search:filterDate:filterSlot | orderBy:'date'"
+              ng-class="isPast(b.date) ? 'past-row' : ''">
+            <td><span class="td-ix">{{ $index + 1 }}</span></td>
+            <td class="td-nm">{{ b.name }}</td>
+            <td class="td-ph">{{ b.phone }}</td>
+            <td style="color:var(--muted);">{{ b.players || '—' }} 👤</td>
+            <td class="td-date">
+              {{ b.date | prettyDate }}
+              <span class="past-label" ng-show="isPast(b.date)">Past</span>
+              <span class="upcoming-label" ng-show="!isPast(b.date)">Upcoming</span>
+            </td>
+            <td><span class="td-sl">{{ b.slot }}</span></td>
+            <td>
+              <span ng-show="isPast(b.date)" style="color:#888;font-size:.8rem;font-weight:600;">Completed</span>
+              <span ng-show="!isPast(b.date)" style="color:#1e6b2e;font-size:.8rem;font-weight:600;">● Confirmed</span>
+            </td>
+            <td>
+              <button class="btn btn-rd" ng-click="cancelBooking(b.id, b.name)"
+                      ng-show="!isPast(b.date)">🗑️ Cancel</button>
+              <span ng-show="isPast(b.date)" style="color:#aaa;font-size:.8rem;">—</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="empty-box" ng-show="bookings.length === 0">
+        <div class="ei">🏓</div>
+        <p style="font-weight:600;color:var(--ink);margin-bottom:.4rem;">No bookings yet!</p>
+        <p style="font-size:.9rem;margin-bottom:1.2rem;">Book your first court slot and it will appear here.</p>
+        <a href="#booking" class="btn btn-gn btn-sm">Book a Slot →</a>
+      </div>
+
+      <div class="empty-box" ng-show="bookings.length > 0 && (bookings | filterBookings:search:filterDate:filterSlot).length === 0">
+        <div class="ei">🔍</div>
+        <p>No bookings match your filters.</p>
+        <button class="btn btn-gh btn-sm" ng-click="clearFilters()" style="margin-top:.8rem;">Clear Filters</button>
+      </div>
+    </div>
+
+    <!-- Summary stats row -->
+    <div ng-show="bookings.length > 0" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2rem;">
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.06);">
+        <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--green);">{{ bookings.length }}</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:2px;">Total Bookings</div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.06);">
+        <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--amber);">{{ getUpcomingCount() }}</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:2px;">Upcoming</div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.06);">
+        <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--muted);">{{ getPastCount() }}</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:2px;">Completed</div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.06);">
+        <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--forest);">₹{{ bookings.length * 600 }}</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:2px;">Total Spent</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 <strong>City Paddle Court</strong> · Sports Complex, Rajkot, Gujarat · Built with AngularJS</p>
+</footer>
+
+<script>
+// ══════════════════════════════════════════
+// 1. MODULE
+// ══════════════════════════════════════════
+var app = angular.module('paddleApp', []);
+
+// ══════════════════════════════════════════
+// 2. SERVICE — single source of truth
+// ══════════════════════════════════════════
+app.service('CourtService', function () {
+  var bookings = [];
+
+  this.court = {
+    name:        'City Paddle Court',
+    location:    'Sports Complex, Rajkot, Gujarat',
+    price:       '₹600/hr',
+    description: 'Rajkot\'s finest paddle court — floodlit, smooth synthetic turf, free parking and changing rooms. Perfect for casual games and competitive matches alike.',
+    amenities:   ['Floodlights', 'Free Parking', 'Changing Rooms', 'Drinking Water'],
+    timeSlots:   ['6:00 PM – 7:00 PM', '7:00 PM – 8:00 PM', '8:00 PM – 9:00 PM']
+  };
+
+  // Add booking — allows multiple bookings by same or different users
+  // each date+slot combination is unique (real-life constraint)
+  this.add = function (b) {
+    bookings.push({
+      id:      Date.now() + Math.random(),
+      name:    b.name,
+      phone:   b.phone,
+      date:    b.date,
+      slot:    b.slot,
+      players: b.players || '—'
+    });
+  };
+
+  this.all    = function () { return bookings; };
+
+  this.cancel = function (id) {
+    var i = bookings.findIndex(function (b) { return b.id === id; });
+    if (i !== -1) bookings.splice(i, 1);
+  };
+
+  // Check if a specific date+slot is already taken
+  this.isTaken = function (date, slot) {
+    if (!date || !slot) return false;
+    return bookings.some(function (b) { return b.date === date && b.slot === slot; });
+  };
+
+  // Get name of person who booked a slot
+  this.bookedBy = function (date, slot) {
+    var found = bookings.find(function (b) { return b.date === date && b.slot === slot; });
+    return found ? found.name : '';
+  };
+
+  // Count how many slots are free on a given date
+  this.freeCount = function (date, totalSlots) {
+    if (!date) return totalSlots;
+    var taken = bookings.filter(function (b) { return b.date === date; }).length;
+    return totalSlots - taken;
+  };
+});
+
+// ══════════════════════════════════════════
+// 3. DIRECTIVE — reusable footer
+// ══════════════════════════════════════════
+app.directive('siteFooter', function () {
+  return {
+    restrict: 'E',
+    template: '<footer><p>© 2025 <strong>City Paddle Court</strong> · Rajkot, Gujarat</p></footer>'
+  };
+});
+
+// ══════════════════════════════════════════
+// 4a. FILTER — prettyDate
+// ══════════════════════════════════════════
+app.filter('prettyDate', function () {
+  var mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return function (s) {
+    if (!s) return '';
+    var p = s.split('-');
+    if (p.length !== 3) return s;
+    return parseInt(p[2],10) + ' ' + mo[parseInt(p[1],10)-1] + ' ' + p[0];
+  };
+});
+
+// ══════════════════════════════════════════
+// 4b. FILTER — filterBookings (multi-criteria)
+// ══════════════════════════════════════════
+app.filter('filterBookings', function () {
+  return function (list, name, date, slot) {
+    return list.filter(function (b) {
+      var matchName = !name || b.name.toLowerCase().indexOf(name.toLowerCase()) !== -1;
+      var matchDate = !date || b.date === date;
+      var matchSlot = !slot || b.slot === slot;
+      return matchName && matchDate && matchSlot;
+    });
+  };
+});
+
+// ══════════════════════════════════════════
+// 5. CONTROLLER
+// ══════════════════════════════════════════
+app.controller('AppCtrl', function ($scope, CourtService) {
+
+  $scope.court    = CourtService.court;
+  $scope.bookings = CourtService.all();
+
+  // Today's date string YYYY-MM-DD
+  function toDateStr(d) {
+    return d.getFullYear() + '-' +
+      String(d.getMonth()+1).padStart(2,'0') + '-' +
+      String(d.getDate()).padStart(2,'0');
+  }
+  $scope.todayStr = toDateStr(new Date());
+
+  // Form state
+  $scope.form      = {};
+  $scope.submitted = false;
+  $scope.bookErr   = '';
+  $scope.bookOk    = '';
+
+  // Availability checker date (Court section)
+  $scope.checkDate = $scope.todayStr;
+
+  // Table filters
+  $scope.search     = '';
+  $scope.filterDate = '';
+  $scope.filterSlot = '';
+  $scope.cancelMsg  = '';
+
+  // ── Helper: is a slot taken on a date? ──
+  $scope.isSlotTaken = function (date, slot) {
+    return CourtService.isTaken(date, slot);
+  };
+
+  // ── Helper: who booked a slot? ──
+  $scope.getBookedByName = function (date, slot) {
+    return CourtService.bookedBy(date, slot);
+  };
+
+  // ── Helper: how many slots are free on a date? ──
+  $scope.getAvailableCountForDate = function (date) {
+    return CourtService.freeCount(date, $scope.court.timeSlots.length);
+  };
+
+  // ── Helper: phone validation ──
+  $scope.isValidPhone = function (p) {
+    return /^[0-9]{10}$/.test(p);
+  };
+
+  // ── Helper: is a booking date in the past? ──
+  $scope.isPast = function (dateStr) {
+    return dateStr < $scope.todayStr;
+  };
+
+  // ── Stats ──
+  $scope.getUpcomingCount = function () {
+    return $scope.bookings.filter(function (b) { return b.date >= $scope.todayStr; }).length;
+  };
+  $scope.getPastCount = function () {
+    return $scope.bookings.filter(function (b) { return b.date < $scope.todayStr; }).length;
+  };
+
+  // ── Unique dates for filter dropdown ──
+  $scope.getUniqueDates = function () {
+    var seen = {};
+    return $scope.bookings.filter(function (b) {
+      if (seen[b.date]) return false;
+      seen[b.date] = true;
+      return true;
+    }).map(function (b) { return b.date; }).sort();
+  };
+
+  // ── When check-date changes in Court section ──
+  $scope.onCheckDateChange = function () {
+    // slot cards update automatically via ng-class binding
+  };
+
+  // ── When form date changes ──
+  $scope.onFormDateChange = function () {
+    // Reset selected slot so user re-picks from updated list
+    $scope.form.slot = '';
+    $scope.bookErr   = '';
+    $scope.bookOk    = '';
+  };
+
+  // ── Quick book from Court section slot card ──
+  $scope.quickBook = function (date, slot) {
+    // Pre-fill form and scroll to booking section
+    $scope.form.date = date;
+    $scope.form.slot = slot;
+    $scope.bookErr   = '';
+    $scope.bookOk    = '';
+    $scope.submitted = false;
+    document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // ── ng-click: CONFIRM BOOKING ──
+  $scope.confirmBooking = function () {
+    $scope.submitted = true;
+    $scope.bookErr   = '';
+    $scope.bookOk    = '';
+    var f = $scope.form;
+
+    // Validation
+    if (!f.name || !f.name.trim()) {
+      $scope.bookErr = 'Please enter your full name.'; return;
+    }
+    if (!f.phone) {
+      $scope.bookErr = 'Please enter your phone number.'; return;
+    }
+    if (!$scope.isValidPhone(f.phone)) {
+      $scope.bookErr = 'Enter a valid 10-digit phone number.'; return;
+    }
+    if (!f.date) {
+      $scope.bookErr = 'Please select a date.'; return;
+    }
+    if (f.date < $scope.todayStr) {
+      $scope.bookErr = 'Cannot book a slot in the past.'; return;
+    }
+    if (!f.slot) {
+      $scope.bookErr = 'Please select a time slot.'; return;
+    }
+    // Double-check slot is still available (race condition guard)
+    if (CourtService.isTaken(f.date, f.slot)) {
+      $scope.bookErr = 'Sorry! This slot just got booked. Please choose another.';
+      $scope.form.slot = '';
+      return;
+    }
+
+    // Save booking
+    CourtService.add(f);
+    $scope.bookings = CourtService.all();
+
+    $scope.bookOk = '✅ Confirmed! ' + f.name + ' · ' +
+      (f.date | 0) + ' · ' + f.slot +
+      (f.players ? ' · ' + f.players + ' player(s)' : '');
+
+    // Build success message manually (filter not available inline here)
+    var mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var p = f.date.split('-');
+    var prettyD = parseInt(p[2],10) + ' ' + mo[parseInt(p[1],10)-1] + ' ' + p[0];
+    $scope.bookOk = 'Booking confirmed for ' + f.name.trim() +
+      ' on ' + prettyD + ' at ' + f.slot +
+      (f.players ? ' for ' + f.players + ' player(s).' : '.');
+
+    // Reset form but keep name & phone for convenience (multiple bookings)
+    var savedName  = f.name;
+    var savedPhone = f.phone;
+    $scope.form      = { name: savedName, phone: savedPhone };
+    $scope.submitted = false;
+  };
+
+  // ── ng-click: CLEAR FORM ──
+  $scope.clearForm = function () {
+    $scope.form      = {};
+    $scope.submitted = false;
+    $scope.bookErr   = '';
+    $scope.bookOk    = '';
+  };
+
+  // ── ng-click: CANCEL BOOKING ──
+  $scope.cancelBooking = function (id, name) {
+    if (!window.confirm('Cancel booking for ' + name + '? This cannot be undone.')) return;
+    CourtService.cancel(id);
+    $scope.bookings  = CourtService.all();
+    $scope.cancelMsg = 'Booking for ' + name + ' has been cancelled and the slot is now available.';
+    setTimeout(function () {
+      $scope.$apply(function () { $scope.cancelMsg = ''; });
+    }, 4000);
+  };
+
+  // ── Clear table filters ──
+  $scope.clearFilters = function () {
+    $scope.search     = '';
+    $scope.filterDate = '';
+    $scope.filterSlot = '';
+  };
+
+});
+
+// Scroll fade-up animation
+document.addEventListener('DOMContentLoaded', function () {
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(function (el) { io.observe(el); });
+});
+</script>
+</body>
+</html>
